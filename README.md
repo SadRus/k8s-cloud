@@ -32,3 +32,27 @@ $ docker-compose run web ./manage.py createsuperuser
 `ALLOWED_HOSTS` -- настройка Django со списком разрешённых адресов. Если запрос прилетит на другой адрес, то сайт ответит ошибкой 400. Можно перечислить несколько адресов через запятую, например `127.0.0.1,192.168.0.1,site.test`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#allowed-hosts).
 
 `DATABASE_URL` -- адрес для подключения к базе данных PostgreSQL. Другие СУБД сайт не поддерживает. [Формат записи](https://github.com/jacobian/dj-database-url#url-schema).
+
+Образ с БД считывает следующие переменные окружения:  
+`POSTGRES_DB` -- имя БД
+
+`POSTGRES_USER` -- пользователь БД
+
+`POSTGRES_PASSWORD` -- пароль для пользователя БД
+
+## Деплой с minikube
+
+Убедитесь, что запущен контейнер БД, в данном случае можно использовать команду:
+```sh
+docker-compose -f docker-compose.db.yml up -d
+```
+Запустите **minikube**
+```sh
+minikube start
+```
+Создайте configmap с переменными окружения [полезная статья](https://humanitec.com/blog/handling-environment-variables-with-kubernetes)
+
+Разверните приложение, используя следующую команду:
+```sh
+kubectl apply -f django_app.yml 
+```
