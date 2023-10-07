@@ -2,6 +2,8 @@
 
 Докеризированный сайт на Django для экспериментов с Kubernetes.
 
+Сайт будет доступен локально по адресу http://star-burger.test
+
 Внутри конейнера Django запускается с помощью Nginx Unit, не путать с Nginx. Сервер Nginx Unit выполняет сразу две функции: как веб-сервер он раздаёт файлы статики и медиа, а в роли сервера-приложений он запускает Python и Django. Таким образом Nginx Unit заменяет собой связку из двух сервисов Nginx и Gunicorn/uWSGI. [Подробнее про Nginx Unit](https://unit.nginx.org/).
 
 ## Как запустить dev-версию
@@ -42,23 +44,21 @@ $ docker-compose run web ./manage.py createsuperuser
 
 ## Деплой с minikube
 
-- Убедитесь, что запущен контейнер БД, в данном случае можно использовать команду:
-```sh
-docker-compose -f docker-compose.db.yml up -d
-```
 - Запустите **minikube**
 ```sh
 minikube start
 ```
 - Создайте configmap с переменными окружения ([полезная статья](https://humanitec.com/blog/handling-environment-variables-with-kubernetes))
 
+- Разверните БД с помощью Helm, смотрите секцию ниже
+
 - Разверните приложение, используя следующую команду:
 ```sh
-kubectl apply -f django_app.yml 
+kubectl apply -f django_app.yaml 
 ```
 - Добавьте hosts для ingress (предварительно необходимо его настроить, см.следующую секцию):
 ```sh
-kubectl apply -f ingress-hosts.yml 
+kubectl apply -f ingress-hosts.yaml 
 ```
 
 ### Настройка Ingress
@@ -115,3 +115,17 @@ kubectl apply -f django-clearsessions.yaml
 ```sh
 kubectl apply -f django-migrate.yaml
 ```
+
+## Развертывание БД с помощью helm
+
+- Проверьте, что у вас установлен helm [Документация](https://helm.sh/docs/intro/install/)
+- Добавьте chart-репозитории
+```sh
+helm repo add bitnami https://charts.bitnami.com/bitnami 
+```
+- Установите chart postgresql
+```sh
+helm install postgres-db bitnami/postgresql 
+```
+- После всего не забудьте создать пользователя и БД, обновить переменные окружения, применить миграции для подключения к новой БД внутри кластера.  
+Для этих действий воспользуйтесь справочной информацией, которая появится в терминале после пведыдущего шага.
