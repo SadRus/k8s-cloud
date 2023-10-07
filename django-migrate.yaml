@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-migrate-job
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 60
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      containers:
+      - name : djangoapp-migrate
+        image: docker.io/library/djangoapp:latest
+        envFrom:
+          - configMapRef:
+              name: django-config
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', './manage.py migrate', '--no-input']
+      restartPolicy: Never

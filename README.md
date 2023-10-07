@@ -108,3 +108,10 @@ Escape character is '^]'.
 ```sh
 kubectl apply -f django-clearsessions.yaml
 ```
+
+## Миграции
+
+При обновлении сайта необходимо запускать миграции для БД. Используйте манифест django-migrate.yaml:
+```sh
+kubectl apply -f django-migrate.yaml
+```
