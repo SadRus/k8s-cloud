@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
           - name : djangoapp-clearsessions
-            image: docker.io/library/djangoapp:latest
+            image: sadrus/k8s_djangoapp:latest
             envFrom:
               - configMapRef:
                   name: django-config

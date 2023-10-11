@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name : djangoapp-migrate
-        image: docker.io/library/djangoapp:latest
+        image: sadrus/k8s_djangoapp:latest
         envFrom:
           - configMapRef:
               name: django-config
