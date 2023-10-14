@@ -5,3 +5,4 @@ __pycache__/
 *.properties
 django-config.*
 logs.txt
+README.dev.md

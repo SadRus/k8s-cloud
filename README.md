@@ -1,61 +1,63 @@
 # Django site
 
-Докеризированный сайт на Django для экспериментов с Kubernetes.
+Готовые манифесты Kubernetes для деплоя докеризированного сайта на Django в облаке.
 
-Сайт будет доступен локально по адресу http://star-burger.test
-
-Внутри конейнера Django запускается с помощью Nginx Unit, не путать с Nginx. Сервер Nginx Unit выполняет сразу две функции: как веб-сервер он раздаёт файлы статики и медиа, а в роли сервера-приложений он запускает Python и Django. Таким образом Nginx Unit заменяет собой связку из двух сервисов Nginx и Gunicorn/uWSGI. [Подробнее про Nginx Unit](https://unit.nginx.org/).
-
-## Как запустить dev-версию
-
-Запустите базу данных и сайт:
-
-```shell-session
-$ docker-compose up
-```
-
-В новом терминале не выключая сайт запустите команды для настройки базы данных:
-
-```shell-session
-$ docker-compose run web ./manage.py migrate  # создаём/обновляем таблицы в БД
-$ docker-compose run web ./manage.py createsuperuser
-```
-
-Для тонкой настройки Docker Compose используйте переменные окружения. Их названия отличаются от тех, что задаёт docker-образа, сделано это чтобы избежать конфликта имён. Внутри docker-compose.yaml настраиваются сразу несколько образов, у каждого свои переменные окружения, и поэтому их названия могут случайно пересечься. Чтобы не было конфликтов к названиям переменных окружения добавлены префиксы по названию сервиса. Список доступных переменных можно найти внутри файла [`docker-compose.yml`](./docker-compose.yml).
+Сайт доступен по ссылке https://edu-berserk-jones.sirius-k8s.dvmn.org/  
 
 ## Переменные окружения
 
 Образ с Django считывает настройки из переменных окружения:
 
-`SECRET_KEY` -- обязательная секретная настройка Django. Это соль для генерации хэшей. Значение может быть любым, важно лишь, чтобы оно никому не было известно. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#secret-key).
+`SECRET_KEY` - обязательная секретная настройка Django. Это соль для генерации хэшей. Значение может быть любым, важно лишь, чтобы оно никому не было известно. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#secret-key).
 
-`DEBUG` -- настройка Django для включения отладочного режима. Принимает значения `TRUE` или `FALSE`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-DEBUG).
+`DEBUG` - настройка Django для включения отладочного режима. Принимает значения `TRUE` или `FALSE`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-DEBUG).
 
-`ALLOWED_HOSTS` -- настройка Django со списком разрешённых адресов. Если запрос прилетит на другой адрес, то сайт ответит ошибкой 400. Можно перечислить несколько адресов через запятую, например `127.0.0.1,192.168.0.1,site.test`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#allowed-hosts).
+`ALLOWED_HOSTS` - настройка Django со списком разрешённых адресов. Если запрос прилетит на другой адрес, то сайт ответит ошибкой 400. Можно перечислить несколько адресов через запятую, например `127.0.0.1,192.168.0.1,site.test`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#allowed-hosts).
 
-`DATABASE_URL` -- адрес для подключения к базе данных PostgreSQL. Другие СУБД сайт не поддерживает. [Формат записи](https://github.com/jacobian/dj-database-url#url-schema).
+`DATABASE_URL` - адрес для подключения к базе данных PostgreSQL. Другие СУБД сайт не поддерживает. [Формат записи](https://github.com/jacobian/dj-database-url#url-schema).
 
-Образ с БД считывает следующие переменные окружения:  
-`POSTGRES_DB` -- имя БД
 
-`POSTGRES_USER` -- пользователь БД
+## Деплой
 
-`POSTGRES_PASSWORD` -- пароль для пользователя БД
-
-## Деплой с minikube
-
-- Запустите **minikube**
+- Должен быть установлен kubectl
 ```sh
-minikube start
+sudo apt-get update
+sudo apt-get install -y kubectl
 ```
-- Создайте configmap с переменными окружения ([полезная статья](https://humanitec.com/blog/handling-environment-variables-with-kubernetes))
 
-- Разверните БД с помощью Helm, смотрите секцию ниже
+- У вас должен быть доступ к кластеру, например развернутому в яндекс облаке  
+Для подключения к кластеру обновите конфиг ~/.kube/config, зачастую инструкция для подключения указана на хостинге  
+
+- Установите OpenLens, k9s и т.п. для удобного мониторинга вашего кластера через графический интерфейс  
+
+- У вас должен быть доступ к БД  
+В данном случае используется **Yandex Managed Service for PostgreSQL**, данные для подключения лежат в secrets
+
+- Также необходимо создать ConfigMap (переменные окружение см. выше), пример команды:
+```sh
+kubectl apply -f django-config.yaml
+```
+
+- Т.к. в манифесте для образа приложения выбран тег - latest, то будет использована свежая версия сайта с DockerHub, либо можно скачать свежий образ самостоятельно, используя команду:
+```sh
+docker pull sadrus/k8s_djangoapp:latest
+```
+
+- Перед запуском или при обновлении сайта необходимо применить миграции БД:
+```sh
+kubectl apply -f django-migrate.yaml
+```
+
+- Логи можно смотреть в kubectl logs, например:
+```sh
+kubectl logs svc/web-service 
+```
 
 - Разверните приложение, используя следующую команду:
 ```sh
 kubectl apply -f django_app.yaml 
 ```
+
 - Добавьте hosts для ingress (предварительно необходимо его настроить, см.следующую секцию):
 ```sh
 kubectl apply -f ingress-hosts.yaml 
@@ -108,24 +110,3 @@ Escape character is '^]'.
 ```sh
 kubectl apply -f django-clearsessions.yaml
 ```
-
-## Миграции
-
-При обновлении сайта необходимо запускать миграции для БД. Используйте манифест django-migrate.yaml:
-```sh
-kubectl apply -f django-migrate.yaml
-```
-
-## Развертывание БД с помощью helm
-
-- Проверьте, что у вас установлен helm [Документация](https://helm.sh/docs/intro/install/)
-- Добавьте chart-репозитории
-```sh
-helm repo add bitnami https://charts.bitnami.com/bitnami 
-```
-- Установите chart postgresql
-```sh
-helm install postgres-db bitnami/postgresql 
-```
-- После всего не забудьте создать пользователя и БД, обновить переменные окружения, применить миграции для подключения к новой БД внутри кластера.  
-Для этих действий воспользуйтесь справочной информацией, которая появится в терминале после пведыдущего шага.
