@@ -4,6 +4,8 @@
 
 Сайт доступен по ссылке https://edu-berserk-jones.sirius-k8s.dvmn.org/  
 
+[Ссылка на веб-консоль яндекс облако](https://console.cloud.yandex.ru/folders/b1gtcctl0mkamhmvoq79/managed-kubernetes/cluster/cat528346gdueh53ts39/overview). Namespace **edu-berserk-jones**
+
 ## Переменные окружения
 
 Образ с Django считывает настройки из переменных окружения:
