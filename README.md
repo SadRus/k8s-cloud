@@ -63,46 +63,6 @@ kubectl apply -f django_app.yaml
 kubectl apply -f ingress-hosts.yaml 
 ```
 
-### Настройка Ingress
-
-Для доступа к сайту через URL необходимо использовать ingress controller  
-В данном случае используется **Ingress-Nginx Controller**
-
-- Включите Ingress-Nginx Controller в кластере minikube командой:
-```sh
-minikube addons enable ingress
-```
-
-- Создайте configmap для TCP services:
-```sh
-kubectl apply -f tcp-services.yml
-```
-
-- Добавьте TCP services к nginx ingress controller:
-```sh
-kubectl patch configmap tcp-services -n ingress-nginx --patch '{"data":{"port":"default/web-service:port"}}'
-```
-где:  
-&nbsp;&nbsp;&nbsp;&nbsp; **port** - порт, который прослушивает ваш service  
-&nbsp;&nbsp;&nbsp;&nbsp; **default** -  namespace в котором располагается service  
-&nbsp;&nbsp;&nbsp;&nbsp; **web-service** - имя service  
-
-- Последний шаг, необходимо пропатчить ingress-nginx-controller:
-```sh
-kubectl patch deployment ingress-nginx-controller --patch "$(cat ingress-nginx-controller-patch.yaml)" -n ingress-nginx
-```
-
-- Проверить соединение можно следующей командой:
-```sh
-telnet $(minikube ip) port
-```
-Вы должны увидеть что-то подобное:
-```sh
-Trying 192.168.49.2...
-Connected to 192.168.49.2.
-Escape character is '^]'.
-```
-
 ## Удаление сессий
 
 С помощью CronJob можно настроить автоматическое удаление сессий по расписанию (в нашем примере - раз в месяц).  
