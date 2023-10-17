@@ -18,5 +18,10 @@ spec:
               - configMapRef:
                   name: django-config
             imagePullPolicy: IfNotPresent
-            command: ['sh', '-c', './manage.py clearsessions']
+            command:
+              - python
+              - manage.py
+              - clearsessions
+            args:
+              - --skip-checks
           restartPolicy: Never

@@ -4,7 +4,7 @@
 
 Сайт доступен по ссылке https://edu-berserk-jones.sirius-k8s.dvmn.org/  
 
-[Ссылка на веб-консоль яндекс облако](https://console.cloud.yandex.ru/folders/b1gtcctl0mkamhmvoq79/managed-kubernetes/cluster/cat528346gdueh53ts39/overview). Namespace **edu-berserk-jones**
+[Ссылка на веб-консоль яндекс облако](https://console.cloud.yandex.ru/folders/b1gtcctl0mkamhmvoq79/managed-kubernetes/cluster/cat528346gdueh53ts39/overview).  Namespace **edu-berserk-jones**
 
 ## Переменные окружения
 
@@ -58,11 +58,6 @@ kubectl logs svc/web-service
 - Разверните приложение, используя следующую команду:
 ```sh
 kubectl apply -f django_app.yaml 
-```
-
-- Добавьте hosts для ingress (предварительно необходимо его настроить, см.следующую секцию):
-```sh
-kubectl apply -f ingress-hosts.yaml 
 ```
 
 ## Удаление сессий

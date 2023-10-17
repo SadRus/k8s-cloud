@@ -15,5 +15,10 @@ spec:
           - configMapRef:
               name: django-config
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', './manage.py migrate', '--no-input']
+        command:
+          - python
+          - manage.py
+          - migrate
+        args:
+          - --no-input
       restartPolicy: Never
